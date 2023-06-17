@@ -68,7 +68,7 @@ datasources:
     type: prometheus
     access: proxy
     orgId: 1
-    url: http://load-balancer:9009/prometheus
+    url: http://nginx:9009/prometheus
     version: 1
     editable: true
     jsonData:
@@ -81,7 +81,7 @@ datasources:
     type: alertmanager
     access: proxy
     orgId: 1
-    url: http://load-balancer:9009/
+    url: http://nginx:9009/
     version: 1
     editable: true
     jsonData:
