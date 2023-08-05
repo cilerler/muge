@@ -6,33 +6,15 @@ networks:
 
 services:
 
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:10.0.3
-    environment:
-      - GF_INSTALL_PLUGINS=raintank-worldping-app,grafana-azure-data-explorer-datasource,marcusolsson-json-datasource,redis-datasource
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+  redis-insight:
+    container_name: redis-insight
+    image: redislabs/redisinsight:latest
     ports:
-      - "3000:3000"
+      - "16379:8001"
     volumes:
-      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/ds.yaml
-      - ./config/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/sy.yaml
-      - ./config/dashboards:/var/lib/grafana/dashboards/docker-compose
-      - ~/.docker/volumes/muge/grafana:/var/lib/grafana
+      - ~/.docker/volumes/muge/redis-insight/data:/db
     networks:
       - muge_network
-
-  # redis-insight:
-  #   container_name: redis-insight
-  #   image: redislabs/redisinsight:latest
-  #   ports:
-  #     - "16379:8001"
-  #   volumes:
-  #     - ~/.docker/volumes/muge/redis-insight/data:/db
-  #   networks:
-  #     - muge_network
 
   # pgadmin:
   #   container_name: pgadmin

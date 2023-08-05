@@ -163,6 +163,22 @@ services:
     ports:
       - "9100:9100"
 
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:10.0.3
+    environment:
+      - GF_INSTALL_PLUGINS=raintank-worldping-app,grafana-azure-data-explorer-datasource,marcusolsson-json-datasource,redis-datasource
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/ds.yaml
+      - ./config/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/sy.yaml
+      - ./config/dashboards:/var/lib/grafana/dashboards/docker-compose
+      - ~/.docker/volumes/muge/grafana:/var/lib/grafana
+
   redis:
     container_name: redis
     image: "redis:7.0.11-alpine"
