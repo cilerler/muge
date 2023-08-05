@@ -16,7 +16,7 @@ datasources:
     orgId: 1
     url: http://tempo:3200
     basicAuth: false
-    isDefault: true
+    isDefault: false
     version: 1
     editable: false
     apiVersion: 1
@@ -37,6 +37,9 @@ datasources:
   - name: Loki
     uid: loki
     type: loki
+    isDefault: true
+    version: 1
+    editable: false
     access: proxy
     url: http://loki:3100
     jsonData:
@@ -48,22 +51,28 @@ datasources:
       httpHeaderName1: "X-Scope-OrgID"
     secureJsonData:
       httpHeaderValue1: "tenant1"
-  - name: MSSQL
+  - name: Microsoft SQL Server
     uid: mssql
     type: mssql
     url: host.docker.internal:11433
-    database: Development
+    database: master
     user: sa
     jsonData:
       maxOpenConns: 0 # Grafana v5.4+
       maxIdleConns: 2 # Grafana v5.4+
       connMaxLifetime: 14400 # Grafana v5.4+
     secureJsonData:
-      password: 'S0m3P@$$w0rd'
+      password: "PasswordAdmin1!"
+    isDefault: false
+    version: 1
+    editable: true
   - name: JSON API (muge)
     uid: muge
     type: marcusolsson-json-datasource
     url: http://host.docker.internal:5000
+    isDefault: false
+    version: 1
+    editable: true
   - name: Mimir
     type: prometheus
     access: proxy
@@ -89,3 +98,24 @@ datasources:
       implementation: 'cortex'
     secureJsonData:
       httpHeaderValue1: 'muge'
+  - name: Redis
+    uid: redis
+    orgId: 1
+    type: redis-datasource
+    access: proxy
+    url: redis:6379
+    user: ""
+    database: ""
+    basicAuth: false
+    basicAuthUser: ""
+    withCredentials: false
+    isDefault: false
+    jsonData:
+      acl: false
+      tlsAuth: false
+    secureJsonFields:
+      password: true
+    secureJsonData:
+      password: "passwordadmin"
+    version: 3
+    readOnly: true

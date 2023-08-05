@@ -1,0 +1,60 @@
+version: '3.8'
+
+networks:
+  muge_network:
+    external: true
+
+services:
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:10.0.3
+    environment:
+      - GF_INSTALL_PLUGINS=raintank-worldping-app,grafana-azure-data-explorer-datasource,marcusolsson-json-datasource,redis-datasource
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/ds.yaml
+      - ./config/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/sy.yaml
+      - ./config/dashboards:/var/lib/grafana/dashboards/docker-compose
+      - ~/.docker/volumes/muge/grafana:/var/lib/grafana
+    networks:
+      - muge_network
+
+  # redis-insight:
+  #   container_name: redis-insight
+  #   image: redislabs/redisinsight:latest
+  #   ports:
+  #     - "16379:8001"
+  #   volumes:
+  #     - ~/.docker/volumes/muge/redis-insight/data:/db
+  #   networks:
+  #     - muge_network
+
+  # pgadmin:
+  #   container_name: pgadmin
+  #   image: dpage/pgadmin4:latest
+  #   ports:
+  #     - "15432:80"
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=admin@email.internal
+  #     - PGADMIN_DEFAULT_PASSWORD=passwordadmin
+  #   networks:
+  #     - muge_network
+
+  # mongo-express:
+  #   container_name: mongo-express
+  #   image: mongo-express:latest
+  #   environment:
+  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=useradmin
+  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=passwordadmin
+  #     - ME_CONFIG_MONGODB_SERVER=mongodb
+  #     - ME_CONFIG_BASICAUTH_USERNAME=useradmin
+  #     - ME_CONFIG_BASICAUTH_PASSWORD=passwordadmin
+  #   ports:
+  #     - "8081:8081"
+  #   networks:
+  #     - muge_network
