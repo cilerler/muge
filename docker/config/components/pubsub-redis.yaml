@@ -1,12 +1,14 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: configstore
+  name: pubsub-redis
 spec:
-  type: configuration.redis
+  type: pubsub.redis
   version: v1
   metadata:
   - name: redisHost
     value: redis:6379
   - name: redisPassword
     value: "passwordadmin"
+  # - name: consumerID # Optional: defaults to the app's own ID
+  #   value: "{identifier}"

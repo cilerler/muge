@@ -1,9 +1,9 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: pubsub
+  name: lockstore
 spec:
-  type: pubsub.redis
+  type: lock.redis
   version: v1
   metadata:
   - name: redisHost

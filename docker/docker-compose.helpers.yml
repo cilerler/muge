@@ -54,10 +54,11 @@ services:
      "-dapr-http-port", "3601",
      "-dapr-grpc-port", "50002",
      "-app-port", "5000",
+     "--app-channel-address", "host.docker.internal"
      ]
     volumes:
-        - "./config/components/:/components"
-        - "${APPDATA}/Microsoft/UserSecrets/LinqPad:/secrets:ro"
+        - ./config/components:/components
+        - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/secrets:ro
         # - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/root/.microsoft/usersecrets/LinqPad:ro
     # network_mode: "service:linqpad"
     networks:
