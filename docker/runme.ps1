@@ -30,8 +30,8 @@ function StartOrStopDockerServices {
 
     switch ($action) {
         "up" {
-            docker compose up rabbitmq redis -d
-            docker compose -f $DOCKER_HELPERS_FILE -p $PROJECT_NAME up "redis-insight" -d
+            docker compose up placement redis rabbitmq  -d
+            docker compose -f $DOCKER_HELPERS_FILE -p $PROJECT_NAME up "linqpad-dapr" -d
         }
         "down" {
             docker compose down

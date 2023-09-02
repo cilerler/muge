@@ -6,15 +6,15 @@ networks:
 
 services:
 
-  redis-insight:
-    container_name: redis-insight
-    image: redislabs/redisinsight:latest
-    ports:
-      - "16379:8001"
-    volumes:
-      - ~/.docker/volumes/muge/redis-insight/data:/db
-    networks:
-      - muge_network
+  # redis-insight:
+  #   container_name: redis-insight
+  #   image: redislabs/redisinsight:latest
+  #   ports:
+  #     - "16379:8001"
+  #   volumes:
+  #     - ~/.docker/volumes/muge/redis-insight/data:/db
+  #   networks:
+  #     - muge_network
 
   # pgadmin:
   #   container_name: pgadmin
@@ -63,3 +63,26 @@ services:
     # network_mode: "service:linqpad"
     networks:
       - muge_network
+
+  # myapp:
+  #   build: C:\Users\ciler\Source\local\20230822\order-processor
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     - muge_network
+  # myapp-dapr:
+  #   image: "daprio/daprd:edge"
+  #   command: ["./daprd",
+  #    "-placement-host-address", "placement:50005",
+  #    "-components-path", "/components",
+  #    "-app-id", "myapp"
+  #   #  "-app-port", "80",
+  #   #  "-dapr-grpc-port", "50002"
+  #    ]
+  #   volumes:
+  #       - "./config/components/:/components"
+  #       - "~/Source/local/20230822/mysecrets:/secrets"
+  #       - "~/Source/local/20230822/appconfig:/appconfig"
+  #   depends_on:
+  #     - myapp
+  #   network_mode: "service:myapp"
