@@ -1,7 +1,7 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: pubsub-servicebus
+  name: pubsubbroker-servicebus
 spec:
   type: pubsub.azure.servicebus.queues
   # type: pubsub.azure.servicebus.topics

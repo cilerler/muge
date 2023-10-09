@@ -57,7 +57,8 @@ services:
      "--app-channel-address", "host.docker.internal"
      ]
     volumes:
-        - ./config/components:/components
+        - ./config/components/development:/components
+        - "C:/.ignore/localstorage:/localstorage"
         - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/secrets:ro
         # - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/root/.microsoft/usersecrets/LinqPad:ro
     # network_mode: "service:linqpad"
@@ -65,7 +66,7 @@ services:
       - muge_network
 
   # myapp:
-  #   build: C:\Users\ciler\Source\local\20230822\order-processor
+  #   build: "~\Source\local\20230822\order-processor"
   #   ports:
   #     - "80:80"
   #   networks:
@@ -80,8 +81,9 @@ services:
   #   #  "-dapr-grpc-port", "50002"
   #    ]
   #   volumes:
-  #       - "./config/components/:/components"
+  #       - "./config/components/development:/components"
   #       - "~/Source/local/20230822/mysecrets:/secrets"
+  #       - "~/Source/local/20230822/localstorage:/localstorage"
   #       - "~/Source/local/20230822/appconfig:/appconfig"
   #   depends_on:
   #     - myapp

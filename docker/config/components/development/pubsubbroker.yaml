@@ -1,13 +1,21 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: pubsub-rabbitmq
+  name: pubsubbroker-rabbitmq
 spec:
   type: pubsub.rabbitmq
   version: v1
   metadata:
   - name: connectionString
     value: "amqp://useradmin:passwordadmin@rabbitmq:5672"
+  # - name: protocol
+  #   value: amqp
+  # - name: hostname
+  #   value: localhost
+  # - name: username
+  #   value: username
+  # - name: password
+  #   value: password
   # - name: consumerID # Optional: defaults to the app's own ID
   #   value: "{identifier}"
   - name: durable
@@ -38,3 +46,5 @@ spec:
     value: fanout
   - name: saslExternal
     value: false
+  - name: ttlInSeconds
+    value: 60

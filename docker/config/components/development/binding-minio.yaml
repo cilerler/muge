@@ -1,0 +1,32 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: binding-minio
+spec:
+  type: bindings.aws.s3
+  version: v1
+  metadata:
+  - name: bucket
+    value: "mybucket"
+  - name: region
+    value: "us-east-1"
+  - name: endpoint
+    value: "http://minio:9001"
+  - name: accessKey
+    value: "minio"
+  - name: secretKey
+    value: "minio123"
+  # - name: sessionToken
+  #   value: "mysession"
+  # - name: decodeBase64
+  #   value: "<bool>"
+  # - name: encodeBase64
+  #   value: "<bool>"
+  - name: forcePathStyle
+    value: "true"
+  # - name: disableSSL
+  #   value: "<bool>"
+  # - name: insecureSSL
+  #   value: "<bool>"
+  # - name: direction
+  #   value: "output"

@@ -1,12 +1,14 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: lockstore
+  name: configurationstore
 spec:
-  type: lock.redis
+  type: configuration.redis
   version: v1
   metadata:
   - name: redisHost
     value: redis:6379
   - name: redisPassword
     value: "passwordadmin"
+  - name: enableTLS
+    value: false
