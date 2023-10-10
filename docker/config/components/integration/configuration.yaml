@@ -1,7 +1,7 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: configurationstore
+  name: configuration
 spec:
   type: configuration.azure.appconfig
   version: v1

@@ -1,7 +1,7 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: statestore
+  name: state
 spec:
   type: state.redis
   version: v1
@@ -9,7 +9,9 @@ spec:
   - name: redisHost
     value: redis:6379
   - name: redisPassword
-    value: "passwordadmin"
+    secretKeyRef:
+      name: redis-secret
+      key:  redis-password
   - name: actorStateStore
     value: "true"
   # - name: enableTLS
@@ -62,3 +64,5 @@ spec:
   #   value: <int> # Optional
   # - name: queryIndexes
   #   value: <string> # Optional
+auth:
+  secretStore: <SECRET_STORE_NAME>
