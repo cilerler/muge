@@ -6,15 +6,15 @@ networks:
 
 services:
 
-  # redis-insight:
-  #   container_name: redis-insight
-  #   image: redislabs/redisinsight:latest
-  #   ports:
-  #     - "16379:8001"
-  #   volumes:
-  #     - ~/.docker/volumes/muge/redis-insight/data:/db
-  #   networks:
-  #     - muge_network
+  redis-insight:
+    container_name: redis-insight
+    image: redislabs/redisinsight:latest
+    ports:
+      - "16379:8001"
+    volumes:
+      - ~/.docker/volumes/muge/redis-insight/data:/db
+    networks:
+      - muge_network
 
   # pgadmin:
   #   container_name: pgadmin
@@ -51,26 +51,68 @@ services:
      "-placement-host-address", "placement:50005",
      "-components-path", "/components",
      "-app-id", "linqpad",
-     "-dapr-http-port", "3601",
+     "-dapr-http-port", "3501",
      "-dapr-grpc-port", "50002",
      "-app-port", "5000",
-     "--app-channel-address", "host.docker.internal"
+     "--app-channel-address", "host.docker.internal",
+     "--log-level", "debug",
+     "--enable-api-logging", "true"
      ]
     volumes:
         - ./config/components/development:/components
         - "C:/.ignore/localstorage:/localstorage"
         - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/secrets:ro
-        # - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/root/.microsoft/usersecrets/LinqPad:ro
     # network_mode: "service:linqpad"
     networks:
       - muge_network
 
+
   # myapp:
-  #   build: "~\Source\local\20230822\order-processor"
+  #   container_name: myapp
+  #   image: myapp:latest
+  #   # build: "~\Source\local\20230822\myproject\src\myapp"
+  #   build:
+  #     context: ../myapp
+  #     dockerfile: ./src/myapp/Dockerfile
+  #     args:
+  #       - BUILD_CONFIGURATION=Release
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=https://+:443;http://+:80
+  #     - ASPNETCORE_Kestrel__Certificates__Default__Password=${DEV_CERTS_PASSWORD}
+  #     - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+  #     - Logging__Console__FormatterName=json
+  #     - Logging__Console__FormatterOptions__IncludeScopes=true
+  #     - Logging__Console__FormatterOptions__UseUtcTimestamp=true
+  #     - Logging__Console__FormatterOptions__TimestampFormat=yyyyMMddHHmmss
+  #     - Logging__Console__FormatterOptions__JsonWriterOptions__Indented=false
+  #     - PrometheusExporterHttpListener=http://+:80/
   #   ports:
-  #     - "80:80"
+  #     - "5000:80"
+  #     - "5001:443"
+  #   volumes:
+  #     - ~/.aspnet/https:/https:ro
+  #     - ${APPDATA}/Microsoft/UserSecrets/myapp:/root/.microsoft/usersecrets/myapp:ro
+  #   # logging:
+  #   #   driver: "gelf"
+  #   #   options:
+  #   #     gelf-address: "udp://host.docker.internal:12201"
+  #   #     # tag: "first-logs"
+  #   #     # max-size: "200k"
+  #   #     # max-file: "10"
+  #   #     # deploy:
+  #   #     #   resources:
+  #   #     #     limits:
+  #   #     #       cpus: '0.25'
+  #   #     #       memory: 256M
+  #   #     #     reservations:
+  #   #     #       cpus: '0.125'
+  #   #     #       memory: 128M
   #   networks:
   #     - muge_network
+
   # myapp-dapr:
   #   image: "daprio/daprd:edge"
   #   command: ["./daprd",
@@ -78,11 +120,12 @@ services:
   #    "-components-path", "/components",
   #    "-app-id", "myapp"
   #   #  "-app-port", "80",
-  #   #  "-dapr-grpc-port", "50002"
+  #   #  "-dapr-http-port", "3500"
+  #   #  "-dapr-grpc-port", "50001"
   #    ]
   #   volumes:
   #       - "./config/components/development:/components"
-  #       - "~/Source/local/20230822/mysecrets:/secrets"
+  #       - "~/Source/local/20230822/secrets:/secrets"
   #       - "~/Source/local/20230822/localstorage:/localstorage"
   #       - "~/Source/local/20230822/appconfig:/appconfig"
   #   depends_on:
