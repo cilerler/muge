@@ -23,8 +23,7 @@ docker compose -f .\docker-compose.helpers.yml -p "muge-helpers" up "linqpad-dap
 ## Create dev-certs
 
 > [!IMPORTANT]  
-> Make sure you change `$DEV_CERTS_PASSWORD`  
-> and set your password into the `.env` file.
+> Replace `$DEV_CERTS_PASSWORD` below with your actual password, and also update it in the `.env` file.
 
 Run on your host machine:
 
