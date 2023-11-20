@@ -88,6 +88,7 @@ services:
   #     - Logging__Console__FormatterOptions__UseUtcTimestamp=true
   #     - Logging__Console__FormatterOptions__TimestampFormat=yyyyMMddHHmmss
   #     - Logging__Console__FormatterOptions__JsonWriterOptions__Indented=false
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   #     - PrometheusExporterHttpListener=http://+:80/
   #   ports:
   #     - "5000:80"

@@ -10,6 +10,11 @@ datasources:
     isDefault: false
     version: 1
     editable: false
+    jsonData:
+      httpMethod: GET
+    exemplarTraceIdDestinations:
+    - name: trace_id
+      datasourceUid: Tempo
   - name: Tempo
     type: tempo
     access: proxy
@@ -23,6 +28,8 @@ datasources:
     uid: tempo
     jsonData:
       httpMethod: GET
+      serviceMap:
+        datasourceUid: prometheus
       tracesToLogs:
         datasourceUid: 'loki'
         tags: ['job', 'instance', 'pod', 'namespace']
@@ -50,7 +57,7 @@ datasources:
           url: "$${__value.raw}"
       httpHeaderName1: "X-Scope-OrgID"
     secureJsonData:
-      httpHeaderValue1: "tenant1"
+      httpHeaderValue1: "1"
   - name: Microsoft SQL Server
     uid: mssql
     type: mssql
@@ -84,7 +91,7 @@ datasources:
       httpHeaderName1: 'X-Scope-OrgID'
       alertmanagerUid: 'alertmanager'
     secureJsonData:
-      httpHeaderValue1: 'muge'
+      httpHeaderValue1: '1'
   - name: Mimir Alertmanager
     uid: alertmanager
     type: alertmanager
@@ -97,7 +104,7 @@ datasources:
       httpHeaderName1: 'X-Scope-OrgID'
       implementation: 'cortex'
     secureJsonData:
-      httpHeaderValue1: 'muge'
+      httpHeaderValue1: '1'
   - name: Redis
     uid: redis
     orgId: 1
