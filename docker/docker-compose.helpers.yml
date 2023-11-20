@@ -6,41 +6,6 @@ networks:
 
 services:
 
-  redis-insight:
-    container_name: redis-insight
-    image: redislabs/redisinsight:latest
-    ports:
-      - "16379:8001"
-    volumes:
-      - ~/.docker/volumes/muge/redis-insight/data:/db
-    networks:
-      - muge_network
-
-  # pgadmin:
-  #   container_name: pgadmin
-  #   image: dpage/pgadmin4:latest
-  #   ports:
-  #     - "15432:80"
-  #   environment:
-  #     - PGADMIN_DEFAULT_EMAIL=admin@email.internal
-  #     - PGADMIN_DEFAULT_PASSWORD=passwordadmin
-  #   networks:
-  #     - muge_network
-
-  # mongo-express:
-  #   container_name: mongo-express
-  #   image: mongo-express:latest
-  #   environment:
-  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=useradmin
-  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=passwordadmin
-  #     - ME_CONFIG_MONGODB_SERVER=mongodb
-  #     - ME_CONFIG_BASICAUTH_USERNAME=useradmin
-  #     - ME_CONFIG_BASICAUTH_PASSWORD=passwordadmin
-  #   ports:
-  #     - "8081:8081"
-  #   networks:
-  #     - muge_network
-
   linqpad-dapr:
     container_name: linqpad-dapr
     image: "daprio/daprd:edge"
@@ -91,8 +56,8 @@ services:
   #     - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   #     - PrometheusExporterHttpListener=http://+:80/
   #   ports:
-  #     - "5000:80"
-  #     - "5001:443"
+  #     - 5000:80
+  #     - 5001:443
   #   volumes:
   #     - ~/.aspnet/https:/https:ro
   #     - ${APPDATA}/Microsoft/UserSecrets/myapp:/root/.microsoft/usersecrets/myapp:ro
