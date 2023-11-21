@@ -51,20 +51,21 @@ services:
       - 4318:4318   # OTLP http receiver
       - 55679       # zpages extension
     depends_on:
-      - tempo
       - loki
-      - prometheus-server
+      - tempo
+      - prometheus
+      - grafana
 
   placement:
     container_name: placement
-    image: "daprio/dapr:1.11.2"
+    image: "daprio/dapr:1.12.2"
     command: ["./placement", "-port", "50005"]
     ports:
       - 6050:50005
 
   minio:
     container_name: minio
-    image: minio/minio:RELEASE.2023-06-16T02-41-06Z
+    image: minio/minio:RELEASE.2023-11-15T20-43-25Z
     entrypoint:
       - sh
       - -euc
@@ -88,7 +89,7 @@ services:
 
   promtail:
     container_name: promtail
-    image: grafana/promtail:main-262e9d0
+    image: grafana/promtail:main-658f4f1
     volumes:
       - ./config/promtail.yml:/etc/promtail/config.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -96,7 +97,7 @@ services:
 
   loki:
     container_name: loki
-    image: grafana/loki:main-262e9d0
+    image: grafana/loki:main-658f4f1
     command: "-config.file=/etc/loki/config.yaml"
     ports:
       - 3100
@@ -109,7 +110,7 @@ services:
 
   tempo:
     container_name: tempo
-    image: grafana/tempo:main-9499cb9
+    image: grafana/tempo:main-57c3300
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./config/tempo.yml:/etc/tempo.yaml
@@ -121,12 +122,12 @@ services:
       - 4318  # otlp http
       - 9411  # zipkin
       - 14268 # jaeger ingest
-    links:
-      - prometheus-server
+    depends_on:
+      - prometheus
 
   mimir-1:
     container_name: mimir-1
-    image: grafana/mimir:2.8.0
+    image: grafana/mimir:2.10.4
     command: [ "-config.file=/etc/mimir.yaml" ]
     hostname: mimir-1
     depends_on:
@@ -137,7 +138,7 @@ services:
       - ~/.docker/volumes/muge/mimir-1/data:/data
   mimir-2:
     container_name: mimir-2
-    image: grafana/mimir:2.8.0
+    image: grafana/mimir:2.10.4
     command: [ "-config.file=/etc/mimir.yaml" ]
     hostname: mimir-2
     depends_on:
@@ -153,14 +154,14 @@ services:
     volumes:
       - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - "mimir-1"
-      - "mimir-2"
+      - mimir-1
+      - mimir-2
     ports:
       - 9009:9009
 
-  prometheus-server:
-    container_name: prometheus-server
-    image: prom/prometheus:v2.44.0
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.48.0
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -170,31 +171,37 @@ services:
       - ~/.docker/volumes/muge/prometheus:/prometheus
       - ./config/prometheus-rules.yml:/etc/prometheus/rules.yaml
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
-    depends_on:
-      - "mimir-1"
-      - "mimir-2"
+    # depends_on:
+    #   - mimir-1
+    #   - mimir-2
 
   prometheus-pushgateway:
     container_name: prometheus-pushgateway
-    image: prom/pushgateway:v1.6.0
+    image: prom/pushgateway:v1.6.2
     ports:
       - 9091:9091
+    depends_on:
+      - prometheus
 
   prometheus-alertmanager:
     container_name: prometheus-alertmanager
-    image: prom/alertmanager:v0.25.0
+    image: prom/alertmanager:v0.26.0
     ports:
       - 9093:9093
+    depends_on:
+      - prometheus
 
   prometheus-node-exporter:
     container_name: prometheus-node-exporter
-    image: prom/node-exporter:v1.6.0
+    image: prom/node-exporter:v1.7.0
     ports:
       - 9100:9100
+    depends_on:
+      - prometheus
 
   grafana:
     container_name: grafana
-    image: grafana/grafana:10.0.3
+    image: grafana/grafana:10.2.1
     environment:
       - GF_INSTALL_PLUGINS=raintank-worldping-app,grafana-azure-data-explorer-datasource,marcusolsson-json-datasource,redis-datasource
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
@@ -212,7 +219,7 @@ services:
 
   redis:
     container_name: redis
-    image: "redis:7.0.11-alpine"
+    image: "redis:7.2.3"
     ports:
       - 6379:6379
     volumes:

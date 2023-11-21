@@ -10,23 +10,26 @@ services:
     container_name: linqpad-dapr
     image: "daprio/daprd:edge"
     ports:
-      - "3601:3601"
-      - "50002:50002"
+      - "3500:3500"
+      - "50001:50001"
     command: ["./daprd",
-     "-placement-host-address", "placement:50005",
-     "-components-path", "/components",
-     "-app-id", "linqpad",
-     "-dapr-http-port", "3501",
-     "-dapr-grpc-port", "50002",
-     "-app-port", "5000",
-     "--app-channel-address", "host.docker.internal",
-     "--log-level", "debug",
-     "--enable-api-logging", "true"
-     ]
+              "-placement-host-address", "placement:50005",
+              "-components-path", "/components",
+              "-app-id", "linqpad",
+              "-dapr-http-port", "3500",
+              "-dapr-grpc-port", "50001",
+              "-app-port", "5000",
+              "--app-channel-address", "host.docker.internal",
+              "--log-level", "debug",
+              "--enable-api-logging", "true"
+             ]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
     volumes:
+        - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/secrets:ro
         - ./config/components/development:/components
         - "C:/.ignore/localstorage:/localstorage"
-        - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/secrets:ro
     # network_mode: "service:linqpad"
     networks:
       - muge_network

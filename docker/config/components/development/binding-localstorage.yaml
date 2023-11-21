@@ -10,3 +10,10 @@ spec:
     value: "/localstorage"
   - name: direction
     value: "output"
+  tracing:
+    samplingRate: "1"
+    stdout: true
+    otel:
+      endpointAddress: "otel-collector:4317"
+      isSecure: false
+      protocol: grpc

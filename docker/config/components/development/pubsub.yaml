@@ -48,3 +48,10 @@ spec:
     value: false
   - name: ttlInSeconds
     value: 60
+  tracing:
+    samplingRate: "1"
+    stdout: true
+    otel:
+      endpointAddress: "otel-collector:4317"
+      isSecure: false
+      protocol: grpc
