@@ -61,7 +61,7 @@ services:
     image: "daprio/dapr:1.12.2"
     command: ["./placement", "-port", "50005"]
     ports:
-      - 6050:50005
+      - 50005:50005
 
   minio:
     container_name: minio
@@ -136,6 +136,7 @@ services:
       - ./config/mimir.yml:/etc/mimir.yaml
       - ./config/alertmanager-fallback-config.yaml:/etc/alertmanager-fallback-config.yaml
       - ~/.docker/volumes/muge/mimir-1/data:/data
+
   mimir-2:
     container_name: mimir-2
     image: grafana/mimir:2.10.4
@@ -246,6 +247,7 @@ services:
       - RABBITMQ_DEFAULT_USER=useradmin
       - RABBITMQ_DEFAULT_PASS=passwordadmin
       - RABBITMQ_PLUGINS_DIR=/opt/rabbitmq/plugins:/usr/lib/rabbitmq/plugins
+      # copy https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v3.12.0/rabbitmq_delayed_message_exchange-3.12.0.ez
       # rabbitmqctl add_user useradmin passwordadmin && rabbitmqctl set_user_tags useradmin administrator && rabbitmqctl set_permissions -p / useradmin ".*" ".*" ".*"
     command: bash -c "rabbitmq-plugins list && rabbitmq-plugins enable rabbitmq_shovel rabbitmq_shovel_management rabbitmq_delayed_message_exchange && rabbitmq-server"
     ports:
@@ -276,7 +278,7 @@ services:
 
   # mongodb:
   #   container_name: mongodb
-  #   image: mongo:5.0.19
+  #   image: mongo:5.0.23
   #   environment:
   #     - MONGO_INITDB_ROOT_USERNAME=useradmin
   #     - MONGO_INITDB_ROOT_PASSWORD=passwordadmin

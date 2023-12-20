@@ -11,7 +11,8 @@ docker compose -f .\docker-compose.helpers.yml -p "muge-helpers" up -d;
 ```
 
 ```powershell
-docker compose up  "otel-collector" placement redis "redis-insight" rabbitmq -d; # runs only dapr placement, redis and rabbitmq
+docker compose up  "otel-collector" -d; # runs open-telemetry collector (which depends on grafana, loki, tempo, prometheus, minio)
+docker compose up  "otel-collector" placement redis "redis-insight" rabbitmq -d;
 docker compose -f .\docker-compose.helpers.yml -p "muge-helpers" up "linqpad-dapr" -d;
 ```
 
