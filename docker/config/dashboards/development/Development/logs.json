@@ -1,0 +1,283 @@
+{
+	"annotations": {
+	  "list": [
+		{
+		  "builtIn": 1,
+		  "datasource": {
+			"type": "grafana",
+			"uid": "-- Grafana --"
+		  },
+		  "enable": true,
+		  "hide": true,
+		  "iconColor": "rgba(0, 211, 255, 1)",
+		  "name": "Annotations & Alerts",
+		  "target": {
+			"limit": 100,
+			"matchAny": false,
+			"tags": [],
+			"type": "dashboard"
+		  },
+		  "type": "dashboard"
+		}
+	  ]
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"links": [],
+	"liveNow": false,
+	"panels": [
+	  {
+		"datasource": {
+		  "type": "loki",
+		  "uid": "loki"
+		},
+		"fieldConfig": {
+		  "defaults": {
+			"color": {
+			  "mode": "palette-classic"
+			},
+			"custom": {
+			  "axisBorderShow": false,
+			  "axisCenteredZero": false,
+			  "axisColorMode": "text",
+			  "axisLabel": "",
+			  "axisPlacement": "auto",
+			  "barAlignment": 0,
+			  "drawStyle": "bars",
+			  "fillOpacity": 100,
+			  "gradientMode": "none",
+			  "hideFrom": {
+				"legend": false,
+				"tooltip": false,
+				"viz": false
+			  },
+			  "insertNulls": false,
+			  "lineInterpolation": "linear",
+			  "lineWidth": 0,
+			  "pointSize": 5,
+			  "scaleDistribution": {
+				"type": "linear"
+			  },
+			  "showPoints": "auto",
+			  "spanNulls": false,
+			  "stacking": {
+				"group": "A",
+				"mode": "normal"
+			  },
+			  "thresholdsStyle": {
+				"mode": "off"
+			  }
+			},
+			"mappings": [],
+			"thresholds": {
+			  "mode": "absolute",
+			  "steps": [
+				{
+				  "color": "green",
+				  "value": null
+				},
+				{
+				  "color": "red",
+				  "value": 80
+				}
+			  ]
+			}
+		  },
+		  "overrides": [
+			{
+			  "matcher": {
+				"id": "byName",
+				"options": "Error"
+			  },
+			  "properties": [
+				{
+				  "id": "color",
+				  "value": {
+					"fixedColor": "red",
+					"mode": "fixed"
+				  }
+				}
+			  ]
+			}
+		  ]
+		},
+		"gridPos": {
+		  "h": 11,
+		  "w": 24,
+		  "x": 0,
+		  "y": 0
+		},
+		"id": 3,
+		"interval": "$interval",
+		"options": {
+		  "legend": {
+			"calcs": [],
+			"displayMode": "list",
+			"placement": "bottom",
+			"showLegend": true
+		  },
+		  "tooltip": {
+			"mode": "multi",
+			"sort": "desc"
+		  }
+		},
+		"targets": [
+		  {
+			"datasource": {
+			  "type": "loki",
+			  "uid": "loki"
+			},
+			"editorMode": "code",
+			"expr": "sum by(severity) (count_over_time({service_name=~\"$container\"} | json | __error__=`` | severity =~ `$level` [$__interval]))",
+			"legendFormat": "Error",
+			"queryType": "range",
+			"refId": "A"
+		  }
+		],
+		"title": "Message By Type",
+		"type": "timeseries"
+	  },
+	  {
+		"datasource": {
+		  "type": "loki",
+		  "uid": "loki"
+		},
+		"gridPos": {
+		  "h": 25,
+		  "w": 24,
+		  "x": 0,
+		  "y": 11
+		},
+		"id": 2,
+		"options": {
+		  "dedupStrategy": "none",
+		  "enableLogDetails": true,
+		  "prettifyLogMessage": false,
+		  "showCommonLabels": false,
+		  "showLabels": false,
+		  "showTime": true,
+		  "sortOrder": "Descending",
+		  "wrapLogMessage": false
+		},
+		"targets": [
+		  {
+			"datasource": {
+			  "type": "loki",
+			  "uid": "loki"
+			},
+			"editorMode": "code",
+			"expr": "{service_name=~\"$container\"} | json | __error__=`` | severity =~ `$level` | line_format `{{ printf \"%-15.15s\" .service_name }}{{ printf \"%-15.15s\" .severity}} {{ printf \"%-150.150s\" .body }} {{ printf \"%-100.100s\" .attributes__OriginalFormat_ }} {{ printf \"%-70.70s\" .instrumentation_scope_name }} {{ printf \"%-15.15s\" .spanid | default \"N/A\" }} {{ .traceid | default \"N/A\" }}`",
+			"queryType": "range",
+			"refId": "A"
+		  }
+		],
+		"title": "Logs - Information",
+		"type": "logs"
+	  }
+	],
+	"refresh": "10s",
+	"schemaVersion": 38,
+	"style": "dark",
+	"tags": ["kubernetes"],
+	"templating": {
+	  "list": [
+		{
+		  "current": {
+			"selected": true,
+			"text": [
+			  "All"
+			],
+			"value": [
+			  "$__all"
+			]
+		  },
+		  "datasource": {
+			"type": "loki",
+			"uid": "loki"
+		  },
+		  "definition": "label_values(service_name)",
+		  "hide": 0,
+		  "includeAll": true,
+		  "label": "Container",
+		  "multi": true,
+		  "name": "container",
+		  "options": [],
+		  "query": "label_values(service_name)",
+		  "refresh": 1,
+		  "regex": "",
+		  "skipUrlSync": false,
+		  "sort": 1,
+		  "type": "query"
+		},
+		{
+		  "current": {
+			"selected": true,
+			"text": "All",
+			"value": "(.*)"
+		  },
+		  "hide": 0,
+		  "includeAll": false,
+		  "label": "Log Level",
+		  "multi": false,
+		  "name": "level",
+		  "options": [
+			{
+			  "selected": true,
+			  "text": "All",
+			  "value": "(.*)"
+			},
+			{
+			  "selected": false,
+			  "text": "Information",
+			  "value": "([iI]nfo.*)"
+			},
+			{
+			  "selected": false,
+			  "text": "Warning",
+			  "value": "([wW]arn.*)"
+			},
+			{
+			  "selected": false,
+			  "text": "Error",
+			  "value": "([eE]rr.*)"
+			},
+			{
+			  "selected": false,
+			  "text": "Trace",
+			  "value": "Trace|verbose"
+			},
+			{
+			  "selected": false,
+			  "text": "Critical",
+			  "value": "Critical|failure"
+			},
+			{
+			  "selected": false,
+			  "text": "Error and Critical",
+			  "value": "([eE]rr.*)|(Critical)|(failure)"
+			},
+			{
+			  "selected": false,
+			  "text": "Console",
+			  "value": "(Console)"
+			}
+		  ],
+		  "query": "All : (.*), Information : ([iI]nfo.*), Warning : ([wW]arn.*), Error : ([eE]rr.*), Trace : Trace|verbose, Critical : Critical|failure, Error and Critical : ([eE]rr.*)|(Critical)|(failure), Console : (Console)",
+		  "queryValue": "",
+		  "skipUrlSync": false,
+		  "type": "custom"
+		}
+	  ]
+	},
+	"time": {
+	  "from": "now-6h",
+	  "to": "now"
+	},
+	"timepicker": {},
+	"timezone": "",
+	"title": "Logs",
+	"uid": "f0c2ffea-a672-4684-8e99-fbdc5d274c97",
+	"version": 1,
+	"weekStart": ""
+  }

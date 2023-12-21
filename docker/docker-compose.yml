@@ -99,10 +99,10 @@ services:
     container_name: loki
     image: grafana/loki:main-658f4f1
     command: "-config.file=/etc/loki/config.yaml"
-    ports:
-      - 3100
-      - 7946
-      - 9095
+    # ports:
+    #   - 3100
+    #   - 7946
+    #   - 9095
     volumes:
       - ./config/loki.yml:/etc/loki/config.yaml
     depends_on:
@@ -115,13 +115,13 @@ services:
     volumes:
       - ./config/tempo.yml:/etc/tempo.yaml
       - ~/.docker/volumes/muge/tempo:/tmp/tempo
-    ports:
-      - 3200  # tempo
-      - 9095  # tempo grpc
-      - 4317  # otlp grpc
-      - 4318  # otlp http
-      - 9411  # zipkin
-      - 14268 # jaeger ingest
+    # ports:
+    #   - 3200  # tempo
+    #   - 9095  # tempo grpc
+    #   - 4317  # otlp grpc
+    #   - 4318  # otlp http
+    #   - 9411  # zipkin
+    #   - 14268 # jaeger ingest
     depends_on:
       - prometheus
 
@@ -215,7 +215,7 @@ services:
     volumes:
       - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/ds.yaml
       - ./config/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/sy.yaml
-      - ./config/dashboards:/var/lib/grafana/dashboards/docker-compose
+      - ./config/dashboards/development:/var/lib/grafana/dashboards/docker-compose
       - ~/.docker/volumes/muge/grafana:/var/lib/grafana
 
   redis:
