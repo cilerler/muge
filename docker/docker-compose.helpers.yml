@@ -63,7 +63,7 @@ services:
   #     - 5001:443
   #   volumes:
   #     - ~/.aspnet/https:/https:ro
-  #     - ${APPDATA}/Microsoft/UserSecrets/myapp:/root/.microsoft/usersecrets/myapp:ro
+  #     - ${APPDATA}/Microsoft/UserSecrets/myapp:/home/app/.microsoft/usersecrets/myapp:ro
   #   # logging:
   #   #   driver: "gelf"
   #   #   options:
