@@ -52,7 +52,7 @@ datasources:
     jsonData:
       derivedFields:
         - datasourceUid: tempo
-          matcherRegex: "TraceId=(\\w+)"
+          matcherRegex: "traceid=(\\w+)"
           name: TraceId
           url: "$${__value.raw}"
       httpHeaderName1: "X-Scope-OrgID"

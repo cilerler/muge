@@ -7,26 +7,33 @@ spec:
   version: v1
   metadata:
   - name: host
-    value: "smtp host"
+    value: "127.0.0.1"
   - name: port
-    value: "smtp port"
+    value: "25"
   - name: user
     value: "username"
   - name: password
     value: "password"
-  - name: skipTLSVerify
-    value: true|false
-  - name: emailFrom
-    value: "sender@example.com"
-  - name: emailTo
-    value: "receiver@example.com"
-  - name: emailCC
-    value: "cc@example.com"
-  - name: emailBCC
-    value: "bcc@example.com"
-  - name: subject
-    value: "subject"
-  - name: priority
-    value: "[value 1-5]"
+  # - name: skipTLSVerify
+  #   value: true|false
+  # - name: emailFrom
+  #   value: "sender@example.com"
+  # - name: emailTo
+  #   value: "receiver@example.com"
+  # - name: emailCC
+  #   value: "cc@example.com"
+  # - name: emailBCC
+  #   value: "bcc@example.com"
+  # - name: subject
+  #   value: "subject"
+  # - name: priority
+  #   value: "[value 1-5]"
   - name: direction
     value: "output"
+  tracing:
+    samplingRate: "1"
+    stdout: true
+    otel:
+      endpointAddress: "otel-collector:4317"
+      isSecure: false
+      protocol: grpc

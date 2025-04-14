@@ -13,7 +13,7 @@ services:
 
   # plantuml:
   #   container_name: plantuml
-  #   image: plantuml/plantuml-server:tomcat
+  #   image: plantuml/plantuml-server:latest
   #   ports:
   #     - "8080:8080"
 
@@ -303,26 +303,54 @@ services:
   #     - mongodb
 
   # postgresql:
-  #   container_name: postgres
-  #   image: postgres:15.3-alpine
+  #   container_name: postgresql
+  #   image: postgres:16-alpine
+  #   environment:
+  #     - POSTGRES_USER=useradmin
+  #     - POSTGRES_PASSWORD=passwordadmin
   #   ports:
   #     - 5432:5432
   #   volumes:
   #     - ~/.docker/volumes/muge/postgresql/data:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_USER=useradmin
-  #     - POSTGRES_PASSWORD=passwordadmin
 
   # pgadmin:
   #   container_name: pgadmin
   #   image: dpage/pgadmin4:latest
-  #   ports:
-  #     - 15432:80
   #   environment:
   #     - PGADMIN_DEFAULT_EMAIL=admin@email.internal
   #     - PGADMIN_DEFAULT_PASSWORD=passwordadmin
+  #   ports:
+  #     - 15432:80
+  #   volumes:
+  #     - ~/.docker/volumes/muge/pgadmin:/var/lib/pgadmin
   #   depends_on:
   #     - postgresql
+
+  # temporal:
+  #   container_name: temporal
+  #   image: temporalio/auto-setup:latest
+  #   environment:
+  #     - DB=postgresql
+  #     - DB_PORT=5432
+  #     - POSTGRES_USER=useradmin
+  #     - POSTGRES_PWD=passwordadmin
+  #     - POSTGRES_SEEDS=postgresql
+  #     - ENABLE_ES=false
+  #   ports:
+  #     - 7233:7233
+  #   depends_on:
+  #     - postgresql
+
+  # temporal-ui:
+  #   container_name: temporal-ui
+  #   image: temporalio/ui:2.15.0
+  #   environment:
+  #     - TEMPORAL_ADDRESS=temporal:7233
+  #     # - TEMPORAL_CORS_ORIGINS=http://host.docker.internal:5000
+  #   ports:
+  #     - 8080:8080
+  #   depends_on:
+  #     - temporal
 
   # mysql:
   #   container_name: mysql
@@ -397,3 +425,4 @@ services:
   #   ports:
   #     - 5341:5341
   #     - 15341:80
+
