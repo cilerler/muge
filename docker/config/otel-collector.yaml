@@ -1,72 +1,32 @@
 receivers:
   otlp:
     protocols:
-      http:
       grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
 
 exporters:
-  # Data sources: traces, metrics, logs
-  # NOTE: Prior to v0.86.0 use `logging` instead of `debug`
   debug:
     verbosity: detailed
 
-  # Data sources: logs
-  loki:
-    endpoint: http://loki:3100/loki/api/v1/push
-    headers:
-      "X-Scope-OrgID": "1"
-    default_labels_enabled:
-      exporter: true
-      job: true
-      instance: true
-      level: true
-
-  # Data sources: traces
-  otlp:
-    endpoint: tempo:4317
+  otlp/aspire:
+    endpoint: "http://aspire-dashboard:18889"
     tls:
       insecure: true
 
-  # Data sources: metrics
-  prometheus:
-    endpoint: "0.0.0.0:8889"
-    const_labels:
-      label1: value1
-
-  # prometheusremotewrite:
-  #   endpoint: http://some.url:9411/api/prom/push
-    # For official Prometheus (e.g. running via Docker)
-    # endpoint: 'http://prometheus:9090/api/v1/write'
-    # tls:
-    #   insecure: true
+  otlphttp:
+    endpoint: "http://seq:5341/ingest/otlp"
+    tls:
+      insecure: true
 
 processors:
-  # batch metrics before sending to reduce API usage
   batch:
 
-  attributes:
-    actions:
-      - action: insert
-        key: loki.attribute.labels
-        value: event.domain, event.name
-
-  resource:
-    attributes:
-      - action: insert
-        key: loki.format
-        value: json
-      - action: insert
-        key: loki.resource.labels
-        value: service.name, service.namespace
-
-# https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/README.md
 extensions:
-  # responsible for responding to health check calls on behalf of the collector.
   health_check:
-  # fetches the collector’s performance data
   pprof:
     endpoint: :1888
-  # serves as an http endpoint that provides live debugging data about instrumented components.
   zpages:
     endpoint: :55679
 
@@ -75,14 +35,13 @@ service:
   pipelines:
     logs:
       receivers: [otlp]
-      processors: [batch, resource, attributes]
-      exporters: [debug, loki]
+      processors: [batch]
+      exporters: [debug, otlp/aspire, otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, otlp]
+      exporters: [debug, otlp/aspire, otlphttp]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, prometheus]
-
+      exporters: [debug, otlp/aspire]
