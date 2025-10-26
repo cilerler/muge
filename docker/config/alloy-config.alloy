@@ -1,0 +1,106 @@
+// OTLP receiver for traces, metrics, and logs
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    metrics  = [otelcol.processor.batch.default.input]
+    logs     = [otelcol.processor.batch.default.input]
+    traces   = [otelcol.processor.batch.default.input]
+    profiles = [otelcol.processor.batch.default.input]
+  }
+}
+
+// Batch processor
+otelcol.processor.batch "default" {
+  output {
+    metrics  = [otelcol.exporter.prometheus.default.input]
+    logs     = [otelcol.exporter.loki.default.input]
+    traces   = [otelcol.exporter.otlp.tempo.input]
+    profiles = [otelcol.exporter.otlp.pyroscope.input]
+  }
+}
+
+// Export metrics to Prometheus
+otelcol.exporter.prometheus "default" {
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+// Export logs to Loki
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// Export traces to Tempo
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
+
+// Export profiling data to Pyroscope
+otelcol.exporter.otlp "pyroscope" {
+  client {
+    endpoint = "pyroscope:4040"
+    tls {
+      insecure = true
+    }
+  }
+}
+
+// Scrape Docker container logs
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "service_name"
+  }
+}
+
+loki.source.docker "default" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.containers.output
+  forward_to = [loki.write.default.receiver]
+}
+
+// Scrape cAdvisor metrics
+prometheus.exporter.cadvisor "default" {
+  docker_host = "unix:///var/run/docker.sock"
+}
+
+prometheus.scrape "cadvisor" {
+  targets    = prometheus.exporter.cadvisor.default.targets
+  forward_to = [prometheus.remote_write.default.receiver]
+}

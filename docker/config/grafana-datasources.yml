@@ -1,128 +1,59 @@
 apiVersion: 1
+
 datasources:
-  - name: Prometheus
-    type: prometheus
-    uid: prometheus
-    access: proxy
+  - id: 1
+    uid: ff27wqg5o0zk0a
     orgId: 1
+    name: prometheus
+    type: prometheus
+    typeName: Prometheus
+    typeLogoUrl: public/plugins/prometheus/img/prometheus_logo.svg
+    access: proxy
     url: http://prometheus:9090
-    basicAuth: false
-    isDefault: false
-    version: 1
-    editable: false
-    jsonData:
-      httpMethod: GET
-    exemplarTraceIdDestinations:
-    - name: trace_id
-      datasourceUid: Tempo
-  - name: Tempo
-    type: tempo
-    access: proxy
-    orgId: 1
-    url: http://tempo:3200
-    basicAuth: false
-    isDefault: false
-    version: 1
-    editable: false
-    apiVersion: 1
-    uid: tempo
-    jsonData:
-      httpMethod: GET
-      serviceMap:
-        datasourceUid: prometheus
-      tracesToLogs:
-        datasourceUid: 'loki'
-        tags: ['job', 'instance', 'pod', 'namespace']
-        mappedTags: [{ key: 'service.name', value: 'service' }]
-        mapTagNamesEnabled: false
-        spanStartTimeShift: '1h'
-        spanEndTimeShift: '1h'
-        filterByTraceID: false
-        filterBySpanID: false
-      lokiSearch:
-        datasourceUid: 'loki'
-  - name: Loki
-    uid: loki
-    type: loki
-    isDefault: true
-    version: 1
-    editable: false
-    access: proxy
-    url: http://loki:3100
-    jsonData:
-      derivedFields:
-        - datasourceUid: tempo
-          matcherRegex: "traceid=(\\w+)"
-          name: TraceId
-          url: "$${__value.raw}"
-      httpHeaderName1: "X-Scope-OrgID"
-    secureJsonData:
-      httpHeaderValue1: "1"
-  - name: Microsoft SQL Server
-    uid: mssql
-    type: mssql
-    url: host.docker.internal:11433
-    database: master
-    user: sa
-    jsonData:
-      maxOpenConns: 0 # Grafana v5.4+
-      maxIdleConns: 2 # Grafana v5.4+
-      connMaxLifetime: 14400 # Grafana v5.4+
-    secureJsonData:
-      password: "PasswordAdmin1!"
-    isDefault: false
-    version: 1
-    editable: true
-  - name: JSON API (muge)
-    uid: muge
-    type: marcusolsson-json-datasource
-    url: http://host.docker.internal:5000
-    isDefault: false
-    version: 1
-    editable: true
-  - name: Mimir
-    type: prometheus
-    access: proxy
-    orgId: 1
-    url: http://nginx:9009/prometheus
-    version: 1
-    editable: true
-    jsonData:
-      httpHeaderName1: 'X-Scope-OrgID'
-      alertmanagerUid: 'alertmanager'
-    secureJsonData:
-      httpHeaderValue1: '1'
-  - name: Mimir Alertmanager
-    uid: alertmanager
-    type: alertmanager
-    access: proxy
-    orgId: 1
-    url: http://nginx:9009/
-    version: 1
-    editable: true
-    jsonData:
-      httpHeaderName1: 'X-Scope-OrgID'
-      implementation: 'cortex'
-    secureJsonData:
-      httpHeaderValue1: '1'
-  - name: Redis
-    uid: redis
-    orgId: 1
-    type: redis-datasource
-    access: proxy
-    url: redis:6379
     user: ""
     database: ""
     basicAuth: false
-    basicAuthUser: ""
-    withCredentials: false
+    isDefault: true
+    jsonData:
+      httpMethod: POST
+      pdcInjected: false
+      prometheusType: Prometheus
+      prometheusVersion: 2.50.1
+    readOnly: false
+  - id: 2
+    uid: cf27wtjwozrwga
+    orgId: 1
+    name: loki
+    type: loki
+    typeName: Loki
+    typeLogoUrl: public/plugins/loki/img/loki_icon.svg
+    access: proxy
+    url: http://loki:3100
+    user: ""
+    database: ""
+    basicAuth: false
     isDefault: false
     jsonData:
-      acl: false
-      tlsAuth: false
-    secureJsonFields:
-      password: true
-    secureJsonData:
-      password: "passwordadmin"
-    version: 3
-    readOnly: true
+      pdcInjected: false
+    readOnly: false
+  - id: 3
+    uid: cf27wuf6n82yoc
+    orgId: 1
+    name: tempo
+    type: tempo
+    typeName: Tempo
+    typeLogoUrl: public/plugins/tempo/img/tempo_logo.svg
+    access: proxy
+    url: http://tempo:3200
+    user: ""
+    database: ""
+    basicAuth: false
+    isDefault: false
+    jsonData:
+      pdcInjected: false
+      tracesToLogsV2:
+        customQuery: false
+        datasourceUid: cf27wtjwozrwga
+      tracesToMetrics:
+        datasourceUid: ff27wqg5o0zk0a
+    readOnly: false
