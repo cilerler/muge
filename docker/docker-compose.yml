@@ -211,18 +211,18 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: docker.io/library/rabbitmq:4.1-management
+    image: docker.io/library/rabbitmq:4.2-management
     hostname: rabbit-1
     command: /bin/sh -c "rabbitmq-plugins list && rabbitmq-plugins enable rabbitmq_shovel rabbitmq_shovel_management rabbitmq_delayed_message_exchange && rabbitmq-server"
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD}"
       RABBITMQ_PLUGINS_DIR: "/opt/rabbitmq/plugins:/usr/lib/rabbitmq/plugins"
-      # copy https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v3.12.0/rabbitmq_delayed_message_exchange-3.12.0.ez
+      # copy https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.2.0/rabbitmq_delayed_message_exchange-4.2.0.ez
       # rabbitmqctl add_user useradmin passwordadmin && rabbitmqctl set_user_tags useradmin administrator && rabbitmqctl set_permissions -p / useradmin ".*" ".*" ".*"
     volumes:
       - ~/.docker/volumes/muge/rabbitmq/mnesia:/var/lib/rabbitmq/mnesia
-      - ~/.docker/volumes/muge/rabbitmq-plugins:/usr/lib/rabbitmq/plugins:ro
+      # - ~/.docker/volumes/muge/rabbitmq-plugins:/usr/lib/rabbitmq/plugins:ro
     ports:
       - 5672:5672
       - 15672:15672
@@ -248,6 +248,17 @@ services:
       - "staging.database.windows.net:172.17.1.102"
       - "testing.database.windows.net:172.17.1.103"
       - "integration.database.windows.net:172.17.1.104"
+
+  durable-task-framework:
+    container_name: durable-task-framework
+    image: "scaletone/durablefunctionsmonitor.mssql:6.7"
+    ports:
+      - 7072:80
+    environment:
+      DFM_SQL_CONNECTION_STRING: "data source=tcp:host.docker.internal,1433;initial catalog=development;persist security info=True;user id=${MSSQL_USERNAME};password=${MSSQL_PASSWORD};MultipleActiveResultSets=True;Connection Timeout=30;Encrypt=True;TrustServerCertificate=True;App=DurableTaskFramework;"
+      DFM_NONCE: "i_sure_know_what_i_am_doing"
+    depends_on:
+      - mssql
 
 
   # cloudbeaver:
