@@ -7,7 +7,7 @@ services:
 
   # placement:
   #   container_name: placement
-  #   image: "daprio/dapr:1.16.1"
+  #   image: "daprio/dapr:1.16.2"
   #   command: ["./placement", "-port", "50005"]
   #   ports:
   #     - 50005:50005
@@ -71,9 +71,9 @@ services:
     environment:
       ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
     ports:
-      - "18888:18888"
-    expose:
-      - "18889"
+      - "18888:18888" # Aspire Dashboard
+      - "18889:18889" # OTLP/gRPC receiver
+      - "18890:18890" # OTLP/HTTP receiver
 
 
   alloy:
@@ -218,11 +218,11 @@ services:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD}"
       RABBITMQ_PLUGINS_DIR: "/opt/rabbitmq/plugins:/usr/lib/rabbitmq/plugins"
-      # copy https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.2.0/rabbitmq_delayed_message_exchange-4.2.0.ez
+      # Invoke-WebRequest -Uri "https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.2.0/rabbitmq_delayed_message_exchange-4.2.0.ez" -OutFile "~\.docker\volumes\muge\rabbitmq-plugins\rabbitmq_delayed_message_exchange-4.2.0.ez"
       # rabbitmqctl add_user useradmin passwordadmin && rabbitmqctl set_user_tags useradmin administrator && rabbitmqctl set_permissions -p / useradmin ".*" ".*" ".*"
     volumes:
       - ~/.docker/volumes/muge/rabbitmq/mnesia:/var/lib/rabbitmq/mnesia
-      # - ~/.docker/volumes/muge/rabbitmq-plugins:/usr/lib/rabbitmq/plugins:ro
+      - ~/.docker/volumes/muge/rabbitmq-plugins:/usr/lib/rabbitmq/plugins:ro
     ports:
       - 5672:5672
       - 15672:15672
@@ -255,10 +255,10 @@ services:
     ports:
       - 7072:80
     environment:
-      DFM_SQL_CONNECTION_STRING: "data source=tcp:host.docker.internal,1433;initial catalog=development;persist security info=True;user id=${MSSQL_USERNAME};password=${MSSQL_PASSWORD};MultipleActiveResultSets=True;Connection Timeout=30;Encrypt=True;TrustServerCertificate=True;App=DurableTaskFramework;"
+      DFM_SQL_CONNECTION_STRING: "data source=tcp:host.docker.internal,1433;initial catalog=DurableTaskFramework;persist security info=True;user id=${MSSQL_USERNAME};password=${MSSQL_PASSWORD};MultipleActiveResultSets=True;Connection Timeout=30;Encrypt=True;TrustServerCertificate=True;App=DurableTaskFramework;"
       DFM_NONCE: "i_sure_know_what_i_am_doing"
-    depends_on:
-      - mssql
+#    depends_on:
+#      - mssql
 
 
   # cloudbeaver:
@@ -449,9 +449,9 @@ services:
   #   cap_add:
   #     - IPC_LOCK
 
-  # plantuml:
-  #   container_name: plantuml
-  #   image: plantuml/plantuml-server:latest
-  #   ports:
-  #     - "8080:8080"
+  plantuml:
+    container_name: plantuml
+    image: plantuml/plantuml-server:latest
+    ports:
+      - "8080:8080"
 
