@@ -5,6 +5,12 @@ networks:
 
 services:
 
+  plantuml:
+      container_name: plantuml
+      image: plantuml/plantuml-server:latest
+      ports:
+        - "8080:8080"
+
   # placement:
   #   container_name: placement
   #   image: "daprio/dapr:1.16.2"
@@ -448,10 +454,4 @@ services:
   #     - ~/.docker/volumes/muge/vault/config:/vault/config
   #   cap_add:
   #     - IPC_LOCK
-
-  plantuml:
-    container_name: plantuml
-    image: plantuml/plantuml-server:latest
-    ports:
-      - "8080:8080"
 
