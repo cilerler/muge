@@ -11,7 +11,7 @@ exporters:
     verbosity: detailed
 
   otlp/aspire:
-    endpoint: "http://aspire-dashboard:18889"
+    endpoint: "http://aspire:18889"
     tls:
       insecure: true
 

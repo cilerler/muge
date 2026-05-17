@@ -20,7 +20,7 @@ Run on your host machine:
 ```powershell
 Set-Location $env:userprofile;
 dotnet dev-certs https --clean;
-dotnet dev-certs https --export-path ".\.aspnet\https\aspnetapp.pfx" -p $DEV_CERTS_PASSWORD;
+dotnet dev-certs https --export-path ".\.aspnet\https\dev-cert.pfx" -p $DEV_CERTS_PASSWORD;
 dotnet dev-certs https --trust;
 ```
 
@@ -30,13 +30,18 @@ dotnet dev-certs https --trust;
 
 ## Usage
 
-```powershell
-docker compose up -d; # runs infrastructure
-docker compose -f .\docker-compose.helpers.yml -p "muge-helpers" up -d;
-```
+Run from the `docker/` directory.
+
+Bring up the full stack:
 
 ```powershell
-docker compose up  "otel-collector" -d; # runs open-telemetry collector (which depends on grafana, loki, tempo, prometheus, minio)
-docker compose up  "otel-collector" placement redis "redis-insight" rabbitmq -d;
-docker compose -f .\docker-compose.helpers.yml -p "muge-helpers" up "linqpad-dapr" -d;
+docker compose up -d;                                                   # runs infrastructure
+docker compose -f .\docker-compose.dapr.yml -p "muge-dapr" up -d;       # runs Dapr (placement + linqpad sidecar)
+```
+
+Minimum subset for Dapr work (Alloy for OTLP + Redis + RabbitMQ + Dapr sidecar):
+
+```powershell
+docker compose up alloy redis "redis-insight" rabbitmq -d;
+docker compose -f .\docker-compose.dapr.yml -p "muge-dapr" up "placement" "linqpad-dapr" -d;
 ```

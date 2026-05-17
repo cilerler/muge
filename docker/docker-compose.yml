@@ -1,23 +1,14 @@
-networks:
-  default:
-    name: muge_network
-    driver: bridge
-
+name: "Muge"
 services:
 
   plantuml:
-      container_name: plantuml
-      image: plantuml/plantuml-server:latest
-      ports:
-        - "8080:8080"
-
-  # placement:
-  #   container_name: placement
-  #   image: "daprio/dapr:1.16.2"
-  #   command: ["./placement", "-port", "50005"]
-  #   ports:
-  #     - 50005:50005
-
+    container_name: plantuml
+    image: plantuml/plantuml-server:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
 
   # otel-collector:
   #   container_name: otel-collector
@@ -39,10 +30,12 @@ services:
   #     options:
   #       gelf-address: "udp://host.docker.internal:12201"
   #       tag: "otel-collector"
+  #   networks:
+  #     - "muge_network"
   #   restart: "unless-stopped"
   #   depends_on:
   #     - seq-ingestion
-  #     - aspire-dashboard
+  #     - aspire
 
 
   # seq-ingestion:
@@ -52,7 +45,9 @@ services:
   #     - "12201:12201/udp"
   #   environment:
   #     SEQ_ADDRESS: "http://seq:5341"
-  #   restart: unless-stopped
+  #   networks:
+  #     - "muge_network"
+  #   restart: "unless-stopped"
   #   depends_on:
   #     - seq
 
@@ -69,17 +64,9 @@ services:
     ports:
       - "5341:5341"
       - "15341:80"
-
-
-  aspire:
-    container_name: aspire
-    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest"
-    environment:
-      ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
-    ports:
-      - "18888:18888" # Aspire Dashboard
-      - "18889:18889" # OTLP/gRPC receiver
-      - "18890:18890" # OTLP/HTTP receiver
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
 
 
   alloy:
@@ -97,6 +84,9 @@ services:
       - 12345:12345  # Alloy UI
       - 4317:4317    # OTLP gRPC receiver
       - 4318:4318    # OTLP HTTP receiver
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
 
 
   loki:
@@ -110,6 +100,9 @@ services:
       - 3100
       - 7946
       - 9095
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
     depends_on:
       - alloy
 
@@ -128,6 +121,9 @@ services:
       - 4318         # otlp http
       - 9411         # zipkin
       - 14268        # jaeger ingest
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
     depends_on:
       - alloy
 
@@ -142,6 +138,9 @@ services:
       - ~/.docker/volumes/muge/prometheus:/prometheus
     expose:
       - 9090
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
     depends_on:
       - alloy
 
@@ -153,6 +152,9 @@ services:
       - ~/.docker/volumes/muge/pyroscope:/var/lib/pyroscope
     ports:
       - 4040:4040
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
     depends_on:
       - alloy
 
@@ -175,6 +177,9 @@ services:
       - ./config/dashboards/development:/var/lib/grafana/dashboards/docker-compose
     ports:
       - 3000:3000
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
     depends_on:
       - loki
       - tempo
@@ -182,89 +187,162 @@ services:
       - pyroscope
 
 
+  aspire:
+    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest"
+    container_name: "aspire"
+    environment:
+      ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
+    ports:
+      - "18888:18888" # dashboard UI
+      - "18889:18889" # OTLP/gRPC
+      - "18890:18890" # OTLP/HTTP
+    networks:
+      - "muge_network"
+    restart: "always"
+
+
   redis:
-    container_name: redis
-    image: docker.io/library/redis:8.2
-    command: -c "redis-server --requirepass $$REDIS_PASSWORD"
-    entrypoint: /bin/sh
+    image: "docker.io/library/redis:8.2"
+    container_name: "redis"
+    command:
+      - "-c"
+      - "redis-server --requirepass $$REDIS_PASSWORD"
+    entrypoint:
+      - "/bin/sh"
     environment:
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
-    volumes:
-      - ~/.docker/volumes/muge/redis/data:/data
     ports:
-      - 6379:6379
+      - "6379:6379"
+    volumes:
+      - type: "bind"
+        target: "/data"
+        source: "${REDIS_BINDMOUNT_0}"
+        read_only: false
     networks:
-      default:
-        aliases:
-          - "redis-development"
+      - "muge_network"
+    restart: "unless-stopped"
 
 
   redis-insight:
-    container_name: redis-insight
-    image: docker.io/redis/redisinsight:2.70
+    image: "docker.io/redis/redisinsight:2.70"
+    container_name: "redis-insight"
     environment:
       RI_REDIS_HOST1: "redis"
       RI_REDIS_PORT1: "6379"
       RI_REDIS_ALIAS1: "redis"
       RI_REDIS_PASSWORD1: "${REDIS_PASSWORD}"
-    volumes:
-      - ~/.docker/volumes/muge/redis-insight/data:/db
     ports:
-      - 16379:5540
+      - "16379:5540"
+    volumes:
+      - type: "bind"
+        target: "/db"
+        source: "${REDISINSIGHT_BINDMOUNT_0}"
+        read_only: false
     depends_on:
-      - redis
+      redis:
+        condition: "service_started"
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
+
+
+  rabbitmq-init:
+    image: "curlimages/curl:8.10.1"
+    container_name: "rabbitmq-init"
+    command:
+      - "sh"
+      - "-c"
+      - "test -f /plugins/rabbitmq_delayed_message_exchange-${RABBITMQ_DELAYED_EXCHANGE_VERSION}.ez || curl -fsSL https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v${RABBITMQ_DELAYED_EXCHANGE_VERSION}/rabbitmq_delayed_message_exchange-${RABBITMQ_DELAYED_EXCHANGE_VERSION}.ez -o /plugins/rabbitmq_delayed_message_exchange-${RABBITMQ_DELAYED_EXCHANGE_VERSION}.ez"
+    volumes:
+      - type: "bind"
+        target: "/plugins"
+        source: "${RABBITMQ_BINDMOUNT_1}"
+        read_only: false
+    networks:
+      - "muge_network"
 
 
   rabbitmq:
-    container_name: rabbitmq
-    image: docker.io/library/rabbitmq:4.2-management
-    hostname: rabbit-1
-    command: /bin/sh -c "rabbitmq-plugins list && rabbitmq-plugins enable rabbitmq_shovel rabbitmq_shovel_management rabbitmq_delayed_message_exchange && rabbitmq-server"
+    image: "docker.io/library/rabbitmq:4.2-management"
+    container_name: "rabbitmq"
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "rabbitmq-plugins list && rabbitmq-plugins enable rabbitmq_shovel rabbitmq_shovel_management rabbitmq_delayed_message_exchange && rabbitmq-server"
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USERNAME}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD}"
       RABBITMQ_PLUGINS_DIR: "/opt/rabbitmq/plugins:/usr/lib/rabbitmq/plugins"
-      # Invoke-WebRequest -Uri "https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.2.0/rabbitmq_delayed_message_exchange-4.2.0.ez" -OutFile "~\.docker\volumes\muge\rabbitmq-plugins\rabbitmq_delayed_message_exchange-4.2.0.ez"
       # rabbitmqctl add_user useradmin passwordadmin && rabbitmqctl set_user_tags useradmin administrator && rabbitmqctl set_permissions -p / useradmin ".*" ".*" ".*"
-    volumes:
-      - ~/.docker/volumes/muge/rabbitmq/mnesia:/var/lib/rabbitmq/mnesia
-      - ~/.docker/volumes/muge/rabbitmq-plugins:/usr/lib/rabbitmq/plugins:ro
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - type: "bind"
+        target: "/usr/lib/rabbitmq/mnesia"
+        source: "${RABBITMQ_BINDMOUNT_0}"
+        read_only: false
+      - type: "bind"
+        target: "/usr/lib/rabbitmq/plugins"
+        source: "${RABBITMQ_BINDMOUNT_1}"
+        read_only: true
+    depends_on:
+      rabbitmq-init:
+        condition: "service_completed_successfully"
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
+    hostname: "rabbit-1"
 
 
   mssql:
-    container_name: mssql
-    image: cilerler/mssql-server-linux:2022-CU21-ubuntu-22.04
+    image: "cilerler/mssql-server-linux:2022-CU22-ubuntu-22.04"
+    container_name: "mssql"
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Developer"
       MSSQL_SA_PASSWORD: "${MSSQL_PASSWORD}"
+      MSSQL_PID: "Developer"
       MSSQL_AGENT_ENABLED: "true"
       MSSQL_ENABLE_HADR: "0"
+    ports:
+      - "1433:1433"
     volumes:
-      - ~/.docker/volumes/muge/mssql/data:/var/opt/mssql/data
-      - ~/.docker/volumes/muge/mssql/log:/var/opt/mssql/log
-      - ~/.docker/volumes/muge/mssql/secrets:/var/opt/mssql/secrets
-    ports:
-      - 1433:1433
+      - type: "bind"
+        target: "/var/opt/mssql/data"
+        source: "${MSSQL_BINDMOUNT_0}"
+        read_only: false
+      - type: "bind"
+        target: "/var/opt/mssql/log"
+        source: "${MSSQL_BINDMOUNT_1}"
+        read_only: false
+      - type: "bind"
+        target: "/var/opt/mssql/secrets"
+        source: "${MSSQL_BINDMOUNT_2}"
+        read_only: false
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
     extra_hosts:
-      - "production.database.windows.net:172.17.1.101"
-      - "staging.database.windows.net:172.17.1.102"
-      - "testing.database.windows.net:172.17.1.103"
-      - "integration.database.windows.net:172.17.1.104"
+      production.database.windows.net: "192.0.2.1"
+      staging.database.windows.net: "192.0.2.2"
+      testing.database.windows.net: "192.0.2.3"
+      integration.database.windows.net: "192.0.2.4"
 
-  durable-task-framework:
-    container_name: durable-task-framework
+
+  dfm:
     image: "scaletone/durablefunctionsmonitor.mssql:6.7"
-    ports:
-      - 7072:80
+    container_name: "dfm"
     environment:
-      DFM_SQL_CONNECTION_STRING: "data source=tcp:host.docker.internal,1433;initial catalog=DurableTaskFramework;persist security info=True;user id=${MSSQL_USERNAME};password=${MSSQL_PASSWORD};MultipleActiveResultSets=True;Connection Timeout=30;Encrypt=True;TrustServerCertificate=True;App=DurableTaskFramework;"
+      DFM_SQL_CONNECTION_STRING: "data source=tcp://mssql:1433;initial catalog=DurableTaskFramework;persist security info=True;user id=${DFM_USERNAME};password=${DFM_PASSWORD};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;App=DurableFunctionsMonitor;"
       DFM_NONCE: "i_sure_know_what_i_am_doing"
-#    depends_on:
-#      - mssql
+    ports:
+      - "7072:80"
+    depends_on:
+      mssql:
+        condition: "service_started"
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
 
 
   # cloudbeaver:
@@ -423,7 +501,6 @@ services:
   #   #   - ./kibana.yml:/usr/share/kibana/config/kibana.yml
 
 
-
   # cadvisor:
   #   image: gcr.io/cadvisor/cadvisor:latest
   #   ports:
@@ -433,8 +510,6 @@ services:
   #     - /sys:/sys:ro
   #     - /var/lib/docker:/var/lib/docker:ro
   #   privileged: true
-
-
 
 
   # vault:
@@ -455,3 +530,7 @@ services:
   #   cap_add:
   #     - IPC_LOCK
 
+
+networks:
+  muge_network:
+    driver: "bridge"

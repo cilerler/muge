@@ -56,4 +56,16 @@ datasources:
         datasourceUid: cf27wtjwozrwga
       tracesToMetrics:
         datasourceUid: ff27wqg5o0zk0a
+      tracesToProfiles:
+        datasourceUid: pyroscope-local
+    readOnly: false
+  - id: 4
+    uid: pyroscope-local
+    orgId: 1
+    name: pyroscope
+    type: grafana-pyroscope-datasource
+    access: proxy
+    url: http://pyroscope:4040
+    basicAuth: false
+    isDefault: false
     readOnly: false

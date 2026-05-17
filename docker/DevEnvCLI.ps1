@@ -9,7 +9,7 @@ This script controls Docker services, either starting them up or shutting them d
 The action to be performed. Can be either "up" or "down".
 
 .EXAMPLE
-.\runme.ps1 -action "up"
+.\DevEnvCLI.ps1 -action "up"
 
 This example starts the Docker services.
 #>
@@ -20,8 +20,8 @@ param (
 )
 
 # Constants
-$DOCKER_HELPERS_FILE = ".\docker-compose.helpers.yml"
-$PROJECT_NAME = "muge_helpers"
+$DOCKER_DAPR_FILE = ".\docker-compose.dapr.yml"
+$PROJECT_NAME = "muge_dapr"
 
 function StartOrStopDockerServices {
     param (
@@ -30,12 +30,12 @@ function StartOrStopDockerServices {
 
     switch ($action) {
         "up" {
-            docker compose up "otel-collector" placement redis "redis-insight" rabbitmq  -d
-            docker compose -f $DOCKER_HELPERS_FILE -p $PROJECT_NAME up "linqpad-dapr" -d
+            docker compose up "alloy" "redis" "redis-insight" "rabbitmq" -d
+            docker compose -f $DOCKER_DAPR_FILE -p $PROJECT_NAME up "placement" "linqpad-dapr" -d
         }
         "down" {
             docker compose down
-            docker compose -f $DOCKER_HELPERS_FILE -p $PROJECT_NAME down
+            docker compose -f $DOCKER_DAPR_FILE -p $PROJECT_NAME down
         }
     }
 }

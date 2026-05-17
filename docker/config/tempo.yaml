@@ -28,3 +28,8 @@ metrics_generator:
         send_exemplars: true
   traces_storage:
     path: /tmp/tempo/generator/traces
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics]
