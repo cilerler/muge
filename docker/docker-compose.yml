@@ -296,7 +296,7 @@ services:
 
 
   mssql:
-    image: "cilerler/mssql-server-linux:2022-CU22-ubuntu-22.04"
+    image: "cilerler/mssql-server-linux:2025-CU7-ubuntu-24.04"
     container_name: "mssql"
     environment:
       ACCEPT_EULA: "Y"
