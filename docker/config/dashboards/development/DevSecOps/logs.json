@@ -30,7 +30,7 @@
 	  {
 		"datasource": {
 		  "type": "loki",
-		  "uid": "loki"
+		  "uid": "cf27wtjwozrwga"
 		},
 		"fieldConfig": {
 		  "defaults": {
@@ -124,7 +124,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "sum(count_over_time(\n  {container=~\"$container\"} \n  | json \n  | __error__= \"\" \n  | LogLevel =~ \"$level\"\n  [$__interval]\n )) by (LogLevel)",
@@ -135,7 +135,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "sum(count_over_time(\n  {container=\"$container\"}\n  !~ `(^{)|(level=)|(^ts)`\n  [$__interval]))",
@@ -147,7 +147,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "sum(count_over_time(\r\n  {container=\"$container\"} \r\n  | logfmt\r\n  | __error__ = \"\"\r\n  | level != \"\"\r\n  | level =~ \"$level\"\r\n  [$__interval])) by (level)",
@@ -158,7 +158,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "sum(count_over_time(\r\n  {container=\"$container\"} \r\n  | regexp `(?P<message>.*)`\r\n  | logfmt\r\n  | __error__ = \"\"\r\n  | level !~ \"info|warn|error|fail\"\r\n  | line_format `{{ printf \"%30.30s\" .pod}} {{ .message }}`\r\n  [$__interval]\r\n))",
@@ -173,7 +173,7 @@
 	  {
 		"datasource": {
 		  "type": "loki",
-		  "uid": "loki"
+		  "uid": "cf27wtjwozrwga"
 		},
 		"gridPos": {
 		  "h": 25,
@@ -196,7 +196,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "{container=~\"$container\"} | json | json TraceId=\"Scopes[0].TraceId\" | __error__=`` | LogLevel  =~ `$level` | line_format `{{ printf \"%30.30s\" .pod}} {{ printf \"%15.15s\" .LogLevel }} {{ printf \"%-150.150s\" .State_Message}} {{ printf \"%-100.100s\" .State__OriginalFormat_}} {{ printf \"%-70.70s\" .Category}} TraceId={{.TraceId | default \"NULL\"}}`",
@@ -206,7 +206,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "{container=~\"$container\"} \r\n| logfmt \r\n| __error__ = \"\"\r\n| level != \"\"\r\n| level =~ \"$level\"\r\n| line_format `{{ printf \"%30.30s\" .pod}} {{ printf \"%15.15s\" .level}}  {{ printf \"%-100.100s\" .msg}}`",
@@ -217,7 +217,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "{container=~\"$container\"}  !~ `(^{)|(level=)|(^ts)` | regexp `(?P<message>.*)`",
@@ -228,7 +228,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "{container=~\"$container\"}\r\n| regexp `(?P<message>.*)`\r\n| logfmt\r\n| __error__ = \"\"\r\n| level !~ \"info|warn|error|fail\"\r\n| line_format `{{ printf \"%30.30s\" .pod}} {{ .message }}`",
@@ -259,7 +259,7 @@
 		  },
 		  "datasource": {
 			"type": "loki",
-			"uid": "loki"
+			"uid": "cf27wtjwozrwga"
 		  },
 		  "definition": "label_values(container)",
 		  "hide": 0,

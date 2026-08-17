@@ -9,7 +9,9 @@ spec:
   - name: redisHost
     value: redis:6379
   - name: redisPassword
-    value: "passwordadmin"
+    secretKeyRef:
+      name: redis
+      key: password
   # - name: enableTLS
   #   value: <bool> # Optional. Allowed: true, false.
   # - name: failover
@@ -56,10 +58,5 @@ spec:
   #   value: # Optional
   # - name: idleTimeout
   #   value: # Optional
-  tracing:
-    samplingRate: "1"
-    stdout: true
-    otel:
-      endpointAddress: "otel-collector:4317"
-      isSecure: false
-      protocol: grpc
+auth:
+  secretStore: secretstore

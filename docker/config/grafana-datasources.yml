@@ -18,7 +18,7 @@ datasources:
       httpMethod: POST
       pdcInjected: false
       prometheusType: Prometheus
-      prometheusVersion: 2.50.1
+      prometheusVersion: 3.7.2
     readOnly: false
   - id: 2
     uid: cf27wtjwozrwga
@@ -58,6 +58,10 @@ datasources:
         datasourceUid: ff27wqg5o0zk0a
       tracesToProfiles:
         datasourceUid: pyroscope-local
+        tags:
+          - key: service.name
+            value: service_name
+        profileTypeId: process_cpu:cpu:nanoseconds:cpu:nanoseconds
     readOnly: false
   - id: 4
     uid: pyroscope-local

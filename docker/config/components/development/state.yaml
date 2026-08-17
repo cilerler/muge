@@ -9,7 +9,9 @@ spec:
   - name: redisHost
     value: redis:6379
   - name: redisPassword
-    value: "passwordadmin"
+    secretKeyRef:
+      name: redis
+      key: password
   - name: actorStateStore
     value: "true"
   # - name: enableTLS
@@ -62,10 +64,5 @@ spec:
   #   value: <int> # Optional
   # - name: queryIndexes
   #   value: <string> # Optional
-  tracing:
-    samplingRate: "1"
-    stdout: true
-    otel:
-      endpointAddress: "otel-collector:4317"
-      isSecure: false
-      protocol: grpc
+auth:
+  secretStore: secretstore

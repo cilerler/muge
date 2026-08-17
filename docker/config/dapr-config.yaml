@@ -1,0 +1,14 @@
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: muge
+spec:
+  tracing:
+    samplingRate: "0.1"
+    stdout: false
+    otel:
+      endpointAddress: "alloy:4317"
+      isSecure: false
+      protocol: grpc
+  metrics:
+    enabled: true

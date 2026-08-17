@@ -3,7 +3,7 @@ services:
 
   plantuml:
     container_name: plantuml
-    image: plantuml/plantuml-server:latest
+    image: plantuml/plantuml-server:v1.2026.6
     ports:
       - "8080:8080"
     networks:
@@ -54,7 +54,7 @@ services:
 
   seq:
     container_name: seq
-    image: datalust/seq:latest
+    image: datalust/seq:2026.1.17083
     environment:
       ACCEPT_EULA: "Y"
       SEQ_FIRSTRUN_ADMINUSERNAME: "${SEQ_FIRSTRUN_ADMINUSERNAME}"
@@ -81,9 +81,10 @@ services:
       - ./config/alloy-config.alloy:/etc/alloy/config.alloy
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - 12345:12345  # Alloy UI
-      - 4317:4317    # OTLP gRPC receiver
-      - 4318:4318    # OTLP HTTP receiver
+      - "12345:12345"  # Alloy UI
+      - "4317:4317"    # OTLP gRPC receiver
+      - "4318:4318"    # OTLP HTTP receiver
+      - "9999:9999"    # Pyroscope SDK profile receiver
     networks:
       - "muge_network"
     restart: "unless-stopped"
@@ -151,20 +152,17 @@ services:
     volumes:
       - ~/.docker/volumes/muge/pyroscope:/var/lib/pyroscope
     ports:
-      - 4040:4040
+      - "4040:4040"
     networks:
       - "muge_network"
     restart: "unless-stopped"
-    depends_on:
-      - alloy
 
 
   grafana:
     container_name: grafana
     image: grafana/grafana:12.2.1
     environment:
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=grafana-pyroscope-app,grafana-exploretraces-app,grafana-metricsdrilldown-app
-      - GF_INSTALL_PLUGINS=raintank-worldping-app,grafana-azure-data-explorer-datasource,marcusolsson-json-datasource,redis-datasource
+      - GF_PLUGINS_PREINSTALL=grafana-azure-data-explorer-datasource,marcusolsson-json-datasource,redis-datasource
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -176,7 +174,7 @@ services:
       - ./config/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/sy.yaml
       - ./config/dashboards/development:/var/lib/grafana/dashboards/docker-compose
     ports:
-      - 3000:3000
+      - "3000:3000"
     networks:
       - "muge_network"
     restart: "unless-stopped"
@@ -188,7 +186,7 @@ services:
 
 
   aspire:
-    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest"
+    image: "mcr.microsoft.com/dotnet/aspire-dashboard:13.4.2"
     container_name: "aspire"
     environment:
       ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
@@ -202,7 +200,7 @@ services:
 
 
   redis:
-    image: "docker.io/library/redis:8.2"
+    image: "docker.io/library/redis:8.2.8"
     container_name: "redis"
     command:
       - "-c"
@@ -221,10 +219,16 @@ services:
     networks:
       - "muge_network"
     restart: "unless-stopped"
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
 
 
   redis-insight:
-    image: "docker.io/redis/redisinsight:2.70"
+    image: "docker.io/redis/redisinsight:2.70.1"
     container_name: "redis-insight"
     environment:
       RI_REDIS_HOST1: "redis"
@@ -263,7 +267,7 @@ services:
 
 
   rabbitmq:
-    image: "docker.io/library/rabbitmq:4.2-management"
+    image: "docker.io/library/rabbitmq:4.2.9-management"
     container_name: "rabbitmq"
     command:
       - "/bin/sh"
@@ -293,6 +297,12 @@ services:
       - "muge_network"
     restart: "unless-stopped"
     hostname: "rabbit-1"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
 
 
   mssql:
@@ -533,4 +543,5 @@ services:
 
 networks:
   muge_network:
+    name: "muge_network"
     driver: "bridge"

@@ -30,7 +30,7 @@
 	  {
 		"datasource": {
 		  "type": "loki",
-		  "uid": "loki"
+		  "uid": "cf27wtjwozrwga"
 		},
 		"fieldConfig": {
 		  "defaults": {
@@ -126,7 +126,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "sum by(severity) (count_over_time({service_name=~\"$container\"} | json | __error__=`` | severity =~ `$level` [$__interval]))",
@@ -141,7 +141,7 @@
 	  {
 		"datasource": {
 		  "type": "loki",
-		  "uid": "loki"
+		  "uid": "cf27wtjwozrwga"
 		},
 		"gridPos": {
 		  "h": 25,
@@ -164,7 +164,7 @@
 		  {
 			"datasource": {
 			  "type": "loki",
-			  "uid": "loki"
+			  "uid": "cf27wtjwozrwga"
 			},
 			"editorMode": "code",
 			"expr": "{service_name=~\"$container\"} | json | __error__=`` | severity =~ `$level` | line_format `{{ printf \"%-15.15s\" .service_name }}{{ printf \"%-15.15s\" .severity}} {{ printf \"%-150.150s\" .body }} {{ printf \"%-100.100s\" .attributes__OriginalFormat_ }} {{ printf \"%-70.70s\" .instrumentation_scope_name }} {{ printf \"%-15.15s\" .spanid | default \"N/A\" }} {{ .traceid | default \"N/A\" }}`",
@@ -194,7 +194,7 @@
 		  },
 		  "datasource": {
 			"type": "loki",
-			"uid": "loki"
+			"uid": "cf27wtjwozrwga"
 		  },
 		  "definition": "label_values(service_name)",
 		  "hide": 0,

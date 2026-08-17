@@ -2,45 +2,69 @@ networks:
   muge_network:
     external: true
 
+volumes:
+  dapr_scheduler:
+
 services:
 
   placement:
     container_name: placement
     image: "daprio/dapr:1.16.2"
     command: ["./placement", "-port", "50005"]
-    ports:
-      - 50005:50005
+    networks:
+      - "muge_network"
+    restart: "unless-stopped"
+
+  scheduler:
+    container_name: scheduler
+    image: "daprio/dapr:1.16.2"
+    command: ["./scheduler",
+              "--port", "50006",
+              "--etcd-data-dir", "/var/lock/dapr/scheduler"
+             ]
+    volumes:
+      - dapr_scheduler:/var/lock
     networks:
       - "muge_network"
     restart: "unless-stopped"
 
   linqpad-dapr:
     container_name: linqpad-dapr
-    image: "daprio/daprd:edge"
+    image: "daprio/daprd:1.16.2"
     ports:
       - "3500:3500"
       - "50001:50001"
     command: ["./daprd",
               "--placement-host-address", "placement:50005",
+              "--scheduler-host-address", "scheduler:50006",
               "--resources-path", "/components",
+              "--config", "/config/dapr-config.yaml",
               "--app-id", "linqpad",
               "--dapr-http-port", "3500",
               "--dapr-grpc-port", "50001",
+              "--dapr-listen-addresses", "0.0.0.0",
+              "--metrics-port", "9090",
               "--app-port", "5000",
               "--app-channel-address", "host.docker.internal",
-              "--log-level", "debug",
-              "--enable-api-logging", "true"
+              "--log-level", "info",
+              "--enable-api-logging", "false"
              ]
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - OTEL_EXPORTER_OTLP_ENDPOINT=alloy:4317
     volumes:
         - ${APPDATA}/Microsoft/UserSecrets/LinqPad:/secrets:ro
         - ./config/components/development:/components
+        - ./config/dapr-config.yaml:/config/dapr-config.yaml:ro
         - "${DAPR_LOCALSTORAGE_BINDMOUNT}:/localstorage"
     # network_mode: "service:linqpad"
     networks:
       - muge_network
+    depends_on:
+      placement:
+        condition: service_started
+      scheduler:
+        condition: service_started
+    restart: "unless-stopped"
 
 
   # myapp:
@@ -58,7 +82,7 @@ services:
   #     - ASPNETCORE_ENVIRONMENT=Development
   #     - ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
   #     - OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
-  #     - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=alloy:4317
   #       OTEL_SERVICE_NAME: "myapp"
   #     - PrometheusExporterHttpListener=http://+:80/
   #     - Logging__Console__FormatterName=json
@@ -94,7 +118,7 @@ services:
   #     - muge_network
 
   # myapp-dapr:
-  #   image: "daprio/daprd:edge"
+  #   image: "daprio/daprd:1.16.2"
   #   command: ["./daprd",
   #    "-placement-host-address", "placement:50005",
   #    "-components-path", "/components",

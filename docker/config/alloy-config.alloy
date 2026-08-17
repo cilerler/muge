@@ -1,106 +1,122 @@
 // OTLP receiver for traces, metrics, and logs
 otelcol.receiver.otlp "default" {
-  grpc {
-    endpoint = "0.0.0.0:4317"
-  }
+	grpc {
+		endpoint = "0.0.0.0:4317"
+	}
 
-  http {
-    endpoint = "0.0.0.0:4318"
-  }
+	http {
+		endpoint = "0.0.0.0:4318"
+	}
 
-  output {
-    metrics  = [otelcol.processor.batch.default.input]
-    logs     = [otelcol.processor.batch.default.input]
-    traces   = [otelcol.processor.batch.default.input]
-    profiles = [otelcol.processor.batch.default.input]
-  }
+	output {
+		metrics = [otelcol.processor.batch.default.input]
+		logs    = [otelcol.processor.batch.default.input]
+		traces  = [otelcol.processor.batch.default.input]
+	}
 }
 
 // Batch processor
 otelcol.processor.batch "default" {
-  output {
-    metrics  = [otelcol.exporter.prometheus.default.input]
-    logs     = [otelcol.exporter.loki.default.input]
-    traces   = [otelcol.exporter.otlp.tempo.input]
-    profiles = [otelcol.exporter.otlp.pyroscope.input]
-  }
+	output {
+		metrics = [otelcol.exporter.prometheus.default.input]
+		logs    = [otelcol.exporter.loki.default.input]
+		traces  = [otelcol.exporter.otlp.tempo.input]
+	}
 }
 
 // Export metrics to Prometheus
 otelcol.exporter.prometheus "default" {
-  forward_to = [prometheus.remote_write.default.receiver]
+	forward_to = [prometheus.remote_write.default.receiver]
 }
 
 prometheus.remote_write "default" {
-  endpoint {
-    url = "http://prometheus:9090/api/v1/write"
-  }
+	endpoint {
+		url = "http://prometheus:9090/api/v1/write"
+	}
 }
 
 // Export logs to Loki
 otelcol.exporter.loki "default" {
-  forward_to = [loki.write.default.receiver]
+	forward_to = [loki.write.default.receiver]
 }
 
 loki.write "default" {
-  endpoint {
-    url = "http://loki:3100/loki/api/v1/push"
-  }
+	endpoint {
+		url = "http://loki:3100/loki/api/v1/push"
+	}
 }
 
 // Export traces to Tempo
 otelcol.exporter.otlp "tempo" {
-  client {
-    endpoint = "tempo:4317"
-    tls {
-      insecure = true
-    }
-  }
+	client {
+		endpoint = "tempo:4317"
+
+		tls {
+			insecure = true
+		}
+	}
 }
 
-// Export profiling data to Pyroscope
-otelcol.exporter.otlp "pyroscope" {
-  client {
-    endpoint = "pyroscope:4040"
-    tls {
-      insecure = true
-    }
-  }
+// Receive profiles from Pyroscope SDKs and forward them to Pyroscope
+pyroscope.receive_http "default" {
+	http {
+		listen_address = "0.0.0.0"
+		listen_port    = 9999
+	}
+
+	forward_to = [pyroscope.write.default.receiver]
+}
+
+pyroscope.write "default" {
+	endpoint {
+		url = "http://pyroscope:4040"
+	}
 }
 
 // Scrape Docker container logs
 discovery.docker "containers" {
-  host = "unix:///var/run/docker.sock"
+	host = "unix:///var/run/docker.sock"
 }
 
 discovery.relabel "containers" {
-  targets = discovery.docker.containers.targets
+	targets = discovery.docker.containers.targets
 
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*)"
-    target_label  = "container"
-  }
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex         = "/(.*)"
+		target_label  = "container"
+	}
 
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*)"
-    target_label  = "service_name"
-  }
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex         = "/(.*)"
+		target_label  = "service_name"
+	}
 }
 
 loki.source.docker "default" {
-  host       = "unix:///var/run/docker.sock"
-  targets    = discovery.relabel.containers.output
-  forward_to = [loki.write.default.receiver]
+	host       = "unix:///var/run/docker.sock"
+	targets    = discovery.relabel.containers.output
+	forward_to = [loki.write.default.receiver]
 }
 
 // Scrape cAdvisor metrics
 prometheus.exporter.cadvisor "default" {
-  docker_host = "unix:///var/run/docker.sock"
+	docker_host = "unix:///var/run/docker.sock"
 }
 
 prometheus.scrape "cadvisor" {
-  targets    = prometheus.exporter.cadvisor.default.targets
-  forward_to = [prometheus.remote_write.default.receiver]
+	targets    = prometheus.exporter.cadvisor.default.targets
+	forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// Scrape Dapr sidecar metrics
+prometheus.scrape "dapr" {
+	targets = [{
+		"__address__"            = "linqpad-dapr:9090",
+		"deployment_environment" = "Development",
+		"env"                    = "Development",
+		"service_name"           = "linqpad-dapr",
+	}]
+	forward_to = [prometheus.remote_write.default.receiver]
 }
